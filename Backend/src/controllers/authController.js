@@ -1,4 +1,4 @@
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { body, validationResult } from "express-validator";
 import User from "../model/User.js";
@@ -15,17 +15,13 @@ export const register = [
 
     const { email, password, name } = req.body;
     try {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
-
-      const hashedPassword = await bcryptjs.hash(password, 10);
-      const user = await User.create({ email, password: hashedPassword, name });
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
+      const user = new User({
+        username,
+        email,
+        password: await bcrypt.hash(password, 10),
       });
-      res.status(201).json({ token, user: { id: user._id, email, name } });
+      await user.save();
+      res.status(201).json({ message: "Đăng ký thành công" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Server error" });
@@ -37,18 +33,19 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ error: "Invalid credentials" });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res
+        .status(400)
+        .json({ message: "Thông tin đăng nhập chưa chính xác" });
     }
 
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { id: user._id, username: user.name },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
     res.json({
       token,
       user: { id: user._id, email: user.email, name: user.name },
