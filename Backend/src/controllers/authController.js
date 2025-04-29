@@ -6,14 +6,14 @@ import User from "../model/User.js";
 export const register = [
   body("email").isEmail(),
   body("password").isLength({ min: 6 }),
-  body("name").notEmpty(),
+  body("username").notEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, name } = req.body;
+    const { email, password, username } = req.body;
     try {
       const user = new User({
         username,
@@ -40,7 +40,7 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, username: user.name },
+      { id: user._id, username: user.username },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
@@ -48,7 +48,7 @@ export const login = async (req, res) => {
     );
     res.json({
       token,
-      user: { id: user._id, email: user.email, name: user.name },
+      user: { id: user._id, email: user.email, username: user.username },
     });
   } catch (error) {
     console.error(error);
