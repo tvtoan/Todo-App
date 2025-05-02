@@ -15,27 +15,27 @@ export default function App() {
         <Stack.Screen
           name="Register"
           component={Register}
-          options={{ title: "Register" }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Login"
           component={Login}
-          options={{ title: "Login" }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="TaskList"
           component={TaskList}
-          options={{ title: "My Tasks" }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="AddTask"
           component={AddTask}
-          options={{ title: "Add Task" }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="EditTask"
           component={EditTask}
-          options={{ title: "Edit Task" }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

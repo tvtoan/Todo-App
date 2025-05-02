@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./UserService";
 import { Task } from "../types/navigation";
 
-const API_URL = "http://192.168.40.109:3002/api/tasks";
+const API_URL = "http://10.0.2.2:3002/api/tasks";
 
 export const getTasks = async () => {
   try {

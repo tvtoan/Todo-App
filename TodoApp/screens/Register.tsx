@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { register } from "../services/UserService";
@@ -34,35 +42,64 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đăng ký</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Tên"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="words"
+      <Text style={styles.title}>Create Account</Text>
+      <Image
+        source={require("../images/login.jpg")}
+        style={{
+          width: 200,
+          height: 180,
+          marginBottom: 40,
+        }}
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Enter your Name"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize="words"
+        multiline={false}
+        textBreakStrategy="simple"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        multiline={false}
+        textBreakStrategy="simple"
       />
       <TextInput
         style={styles.input}
-        placeholder="Mật khẩu"
+        placeholder="Enter Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        multiline={false}
+        textBreakStrategy="simple"
       />
-      <Button title="Đăng ký" onPress={handleRegister} />
-      <Button
-        title="Quay lại Đăng nhập"
-        onPress={() => navigation.navigate("Login")}
-        color="gray"
-      />
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          marginTop: 20,
+        }}
+      >
+        <Text style={{ color: "#A5F3FC", fontWeight: 500 }}>
+          Already have an account ?
+        </Text>
+        <View style={{ width: 10 }} />
+        <Text
+          style={{ color: "#A5F3FC", fontWeight: "bold" }}
+          onPress={() => navigation.navigate("Login")}
+        >
+          Login
+        </Text>
+      </View>
     </View>
   );
 }
@@ -72,20 +109,39 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#636bfb",
+    alignItems: "center",
   },
   title: {
-    fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
+    fontSize: 28,
     marginBottom: 20,
+    color: "white",
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    paddingLeft: 20,
+    height: 50,
+    marginBottom: 30,
+    borderRadius: 50,
+    color: "black",
     backgroundColor: "white",
+    width: "100%",
+  },
+  button: {
+    backgroundColor: "#50C2C9",
+    padding: 10,
+    borderRadius: 5,
+    height: 50,
+    justifyContent: "center",
+    width: "100%",
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "semibold",
   },
 });
