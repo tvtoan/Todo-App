@@ -1,15 +1,12 @@
 import { useState, useCallback } from "react";
 import { View, Text, FlatList, Button, StyleSheet, Alert } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList, Task } from "../types/navigation";
 import { getTasks, deleteTask } from "../services/TaskService";
 import { logout } from "../services/UserService";
 
-type TaskListNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  "TaskList"
->;
+type TaskListNavigationProp = NavigationProp<RootStackParamList, "TaskList">;
 
 export default function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -18,7 +15,23 @@ export default function TaskList() {
   const fetchTasks = async () => {
     try {
       const data = await getTasks();
-      setTasks(data);
+      // Sắp xếp theo dueDate (sớm nhất trước), sau đó theo priority (Cao > Trung Bình > Thấp)
+      const sortedTasks = data.sort((a: Task, b: Task) => {
+        const dateA = new Date(a.dueDate).getTime();
+        const dateB = new Date(b.dueDate).getTime();
+        if (dateA !== dateB) {
+          return dateA - dateB; // Sắp xếp theo ngày tăng dần
+        }
+        const priorityOrder: {
+          [key in "Cao" | "Trung Bình" | "Thấp"]: number;
+        } = {
+          Cao: 1,
+          "Trung Bình": 2,
+          Thấp: 3,
+        };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
+      setTasks(sortedTasks);
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Không thể tải danh sách công việc");
     }
@@ -42,7 +55,7 @@ export default function TaskList() {
 
   const handleLogout = async () => {
     await logout();
-    navigation.replace("Login");
+    navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   };
 
   return (
@@ -59,9 +72,8 @@ export default function TaskList() {
           <View style={styles.taskItem}>
             <View style={styles.taskContent}>
               <Text style={styles.taskName}>{item.name}</Text>
-              <Text style={styles.taskSubject}>Môn học: {item.subject}</Text>
               <Text style={styles.taskDueDate}>
-                Hạn: {new Date(item.dueDate).toLocaleDateString()}
+                Hạn: {new Date(item.dueDate).toLocaleDateString("vi-VN")}
               </Text>
               <Text style={styles.taskStatus}>Trạng thái: {item.status}</Text>
               <Text style={styles.taskPriority}>Ưu tiên: {item.priority}</Text>
@@ -91,6 +103,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#f0f0f0",
+    marginTop: 100,
   },
   title: {
     fontSize: 24,
@@ -112,10 +125,6 @@ const styles = StyleSheet.create({
   taskName: {
     fontSize: 18,
     fontWeight: "bold",
-  },
-  taskSubject: {
-    fontSize: 14,
-    color: "#555",
   },
   taskDueDate: {
     fontSize: 14,

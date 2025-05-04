@@ -4,7 +4,21 @@ import { Task } from "../types/navigation";
 
 const API_URL = "http://10.0.2.2:3002/api/tasks";
 
-export const getTasks = async () => {
+// Ánh xạ từ tiếng Anh sang tiếng Việt để xử lý dữ liệu cũ
+const statusToFrontend: { [key: string]: string } = {
+  NOT_STARTED: "Chưa Bắt Đầu",
+  IN_PROGRESS: "Đang Thực Hiện",
+  COMPLETED: "Hoàn Thành",
+  PENDING: "Chưa Bắt Đầu",
+};
+
+const priorityToFrontend: { [key: string]: string } = {
+  HIGH: "Cao",
+  MEDIUM: "Trung Bình",
+  LOW: "Thấp",
+};
+
+export const getTasks = async (): Promise<Task[]> => {
   try {
     const token = await getToken();
     if (!token) throw new Error("Không tìm thấy token");
@@ -14,7 +28,14 @@ export const getTasks = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     console.log("Lấy danh sách công việc thành công:", response.data);
-    return response.data; // Danh sách công việc
+
+    // Ánh xạ status và priority sang tiếng Việt
+    const tasks = response.data.map((task: any) => ({
+      ...task,
+      status: statusToFrontend[task.status] || task.status,
+      priority: priorityToFrontend[task.priority] || task.priority,
+    }));
+    return tasks;
   } catch (error: any) {
     console.error(
       "Lỗi lấy công việc:",
@@ -22,17 +43,20 @@ export const getTasks = async () => {
       error.message,
       error.response?.status
     );
-    throw new Error(error.response?.data?.error || "Lấy công việc thất bại");
+    const errorMsg =
+      error.response?.data?.errors?.map((e: any) => e.msg).join(", ") ||
+      error.response?.data?.error ||
+      "Lấy công việc thất bại";
+    throw new Error(errorMsg);
   }
 };
 
 export const createTask = async (
   name: string,
   dueDate: string,
-  subject: string,
   description: string = "",
-  status: "PENDING" | "COMPLETED" = "PENDING",
-  priority: "HIGH" | "MEDIUM" | "LOW" = "MEDIUM"
+  status: "Chưa Bắt Đầu" | "Đang Thực Hiện" | "Hoàn Thành" = "Chưa Bắt Đầu",
+  priority: "Cao" | "Trung Bình" | "Thấp" = "Trung Bình"
 ) => {
   try {
     const token = await getToken();
@@ -41,18 +65,24 @@ export const createTask = async (
     console.log("Gửi yêu cầu tạo công việc:", {
       name,
       dueDate,
-      subject,
       description,
       status,
       priority,
     });
     const response = await axios.post(
       API_URL,
-      { name, description, dueDate, status, priority, subject },
+      { name, description, dueDate, status, priority },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log("Tạo công việc thành công:", response.data);
-    return response.data; // Công việc mới tạo
+
+    // Ánh xạ lại sang tiếng Việt (nếu backend trả về tiếng Anh)
+    return {
+      ...response.data,
+      status: statusToFrontend[response.data.status] || response.data.status,
+      priority:
+        priorityToFrontend[response.data.priority] || response.data.priority,
+    };
   } catch (error: any) {
     console.error(
       "Lỗi tạo công việc:",
@@ -60,7 +90,11 @@ export const createTask = async (
       error.message,
       error.response?.status
     );
-    throw new Error(error.response?.data?.error || "Tạo công việc thất bại");
+    const errorMsg =
+      error.response?.data?.errors?.map((e: any) => e.msg).join(", ") ||
+      error.response?.data?.error ||
+      "Tạo công việc thất bại";
+    throw new Error(errorMsg);
   }
 };
 
@@ -74,7 +108,14 @@ export const updateTask = async (taskId: string, updates: Partial<Task>) => {
       headers: { Authorization: `Bearer ${token}` },
     });
     console.log("Cập nhật công việc thành công:", response.data);
-    return response.data; // Công việc đã cập nhật
+
+    // Ánh xạ lại sang tiếng Việt
+    return {
+      ...response.data,
+      status: statusToFrontend[response.data.status] || response.data.status,
+      priority:
+        priorityToFrontend[response.data.priority] || response.data.priority,
+    };
   } catch (error: any) {
     console.error(
       "Lỗi cập nhật công việc:",
@@ -82,9 +123,11 @@ export const updateTask = async (taskId: string, updates: Partial<Task>) => {
       error.message,
       error.response?.status
     );
-    throw new Error(
-      error.response?.data?.error || "Cập nhật công việc thất bại"
-    );
+    const errorMsg =
+      error.response?.data?.errors?.map((e: any) => e.msg).join(", ") ||
+      error.response?.data?.error ||
+      "Cập nhật công việc thất bại";
+    throw new Error(errorMsg);
   }
 };
 
@@ -106,6 +149,10 @@ export const deleteTask = async (taskId: string) => {
       error.message,
       error.response?.status
     );
-    throw new Error(error.response?.data?.error || "Xóa công việc thất bại");
+    const errorMsg =
+      error.response?.data?.errors?.map((e: any) => e.msg).join(", ") ||
+      error.response?.data?.error ||
+      "Xóa công việc thất bại";
+    throw new Error(errorMsg);
   }
 };

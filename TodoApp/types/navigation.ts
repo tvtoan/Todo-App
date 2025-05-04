@@ -11,8 +11,7 @@ export type Task = {
   name: string;
   description?: string;
   dueDate: string;
-  status: "PENDING" | "COMPLETED";
-  priority: "HIGH" | "MEDIUM" | "LOW";
-  subject: string;
+  status: "Chưa Bắt Đầu" | "Đang Thực Hiện" | "Hoàn Thành";
+  priority: "Cao" | "Trung Bình" | "Thấp";
   userId: string;
 };
