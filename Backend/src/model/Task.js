@@ -4,13 +4,16 @@ const taskSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, default: "" },
   dueDate: { type: Date, required: true },
-  status: { type: String, enum: ["PENDING", "COMPLETED"], default: "PENDING" },
+  status: {
+    type: String,
+    enum: ["Chưa Bắt Đầu", "Đang Thực Hiện", "Hoàn Thành"],
+    default: "Chưa Bắt Đầu",
+  },
   priority: {
     type: String,
-    enum: ["HIGH", "MEDIUM", "LOW"],
-    default: "MEDIUM",
+    enum: ["Cao", "Trung Bình", "Thấp"],
+    default: "Trung Bình",
   },
-  subject: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 });
 

@@ -12,46 +12,62 @@ export const getTasks = async (req, res) => {
 };
 
 export const createTask = [
-  body("name").notEmpty(),
-  body("dueDate").isISO8601().toDate(),
-  body("status").isIn(["PENDING", "COMPLETED"]).optional(),
-  body("priority").isIn(["HIGH", "MEDIUM", "LOW"]).optional(),
-  body("subject").notEmpty(),
+  body("name").notEmpty().withMessage("Tên công việc là bắt buộc"),
+  body("dueDate")
+    .isISO8601()
+    .toDate()
+    .withMessage("Hạn hoàn thành phải là định dạng ISO"),
+  body("status")
+    .isIn(["Chưa Bắt Đầu", "Đang Thực Hiện", "Hoàn Thành"])
+    .optional()
+    .withMessage("Trạng thái không hợp lệ"),
+  body("priority")
+    .isIn(["Cao", "Trung Bình", "Thấp"])
+    .optional()
+    .withMessage("Ưu tiên không hợp lệ"),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("Validation errors:", errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, description, dueDate, status, priority, subject } = req.body;
+    const { name, description, dueDate, status, priority } = req.body;
+    console.log("Received task data:", {
+      name,
+      description,
+      dueDate,
+      status,
+      priority,
+    });
+
     try {
       const task = await Task.create({
         name,
         description,
         dueDate,
-        status: status || "PENDING",
-        priority: priority || "MEDIUM",
-        subject,
+        status: status || "Chưa Bắt Đầu",
+        priority: priority || "Trung Bình",
         userId: req.user.id,
       });
       res.status(201).json(task);
     } catch (error) {
-      console.error(error);
+      console.error("Error creating task:", error);
       res.status(500).json({ error: "Server error" });
     }
   },
 ];
 
 export const updateTask = async (req, res) => {
-  const { name, description, dueDate, status, priority, subject } = req.body;
+  const { name, description, dueDate, status, priority } = req.body;
   try {
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { name, description, dueDate, status, priority, subject },
+      { name, description, dueDate, status, priority },
       { new: true }
     );
     if (!task) {
-      return res.status(404).json({ error: "Task not found" });
+      return res.status(400).json({ error: "Task not found" });
     }
     res.json(task);
   } catch (error) {
@@ -67,7 +83,7 @@ export const deleteTask = async (req, res) => {
       userId: req.user.id,
     });
     if (!task) {
-      return res.status(404).json({ error: "Task not found" });
+      return res.status(400).json({ error: "Task not found" });
     }
     res.json({ message: "Task deleted" });
   } catch (error) {
