@@ -1,10 +1,20 @@
 import { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import { createTask } from "../services/TaskService";
+import { MaterialIcons } from "@expo/vector-icons";
 
 type AddTaskNavigationProp = NavigationProp<RootStackParamList, "AddTask">;
 
@@ -21,7 +31,6 @@ export default function AddTask() {
   );
   const navigation = useNavigation<AddTaskNavigationProp>();
 
-  // Hàm chuyển đổi DD/MM/YYYY hoặc YYYY/MM/DD sang YYYY-MM-DD
   const formatDueDate = (input: string): string => {
     const ddmmyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
     const ddmmyyyyMatch = input.match(ddmmyyyyRegex);
@@ -40,7 +49,6 @@ export default function AddTask() {
     return input;
   };
 
-  // Hàm kiểm tra định dạng YYYY-MM-DD và ngày không trong quá khứ
   const validateDueDate = (
     date: string
   ): { isValid: boolean; error?: string } => {
@@ -72,7 +80,6 @@ export default function AddTask() {
     return { isValid: true };
   };
 
-  // Xử lý thay đổi dueDate (kiểm tra thời gian thực)
   const handleDueDateChange = (text: string) => {
     const formattedDate = formatDueDate(text);
     setDueDate(formattedDate);
@@ -87,7 +94,6 @@ export default function AddTask() {
 
   const handleAddTask = async () => {
     try {
-      // Validation phía client
       if (!name) {
         Alert.alert("Lỗi", "Tên công việc là bắt buộc.");
         return;
@@ -125,125 +131,201 @@ export default function AddTask() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Thêm công việc mới</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Thêm công việc mới</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Tên công việc"
-        value={name}
-        onChangeText={setName}
-      />
+          <Text style={styles.label}>Tên công việc</Text>
+          <TextInput
+            style={[styles.input, name ? styles.inputFilled : null]}
+            placeholder="Tên công việc"
+            value={name}
+            onChangeText={setName}
+          />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Mô tả"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
+          <Text style={styles.label}>Mô tả</Text>
+          <TextInput
+            style={[
+              styles.input,
+              description ? styles.inputFilled : null,
+              styles.inputMultiline,
+            ]}
+            placeholder="Mô tả"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+          />
 
-      <TextInput
-        style={[styles.input, dueDateError ? styles.inputError : null]}
-        placeholder="Hạn hoàn thành (YYYY-MM-DD)"
-        value={dueDate}
-        onChangeText={handleDueDateChange}
-      />
-      {dueDateError && <Text style={styles.errorText}>{dueDateError}</Text>}
-      <Text style={styles.helperText}>
-        Nhập ngày theo định dạng YYYY-MM-DD (ví dụ: 2025-07-22)
-      </Text>
+          <Text style={styles.label}>Hạn hoàn thành</Text>
+          <TextInput
+            style={[
+              styles.input,
+              dueDateError
+                ? styles.inputError
+                : dueDate
+                ? styles.inputFilled
+                : null,
+            ]}
+            placeholder="YYYY-MM-DD (ví dụ: 2025-07-22)"
+            value={dueDate}
+            onChangeText={handleDueDateChange}
+          />
+          {dueDateError && <Text style={styles.errorText}>{dueDateError}</Text>}
+          <Text style={styles.helperText}>
+            Nhập ngày theo định dạng YYYY-MM-DD (ví dụ: 2025-07-22)
+          </Text>
 
-      <Text style={styles.label}>Trạng thái</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={status}
-          onValueChange={(itemValue) =>
-            setStatus(
-              itemValue as "Chưa Bắt Đầu" | "Đang Thực Hiện" | "Hoàn Thành"
-            )
-          }
-          style={styles.picker}
-        >
-          <Picker.Item label="Chưa bắt đầu" value="Chưa Bắt Đầu" />
-          <Picker.Item label="Đang thực hiện" value="Đang Thực Hiện" />
-          <Picker.Item label="Hoàn thành" value="Hoàn Thành" />
-        </Picker>
+          <Text style={styles.label}>Trạng thái</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={status}
+              onValueChange={(itemValue) =>
+                setStatus(
+                  itemValue as "Chưa Bắt Đầu" | "Đang Thực Hiện" | "Hoàn Thành"
+                )
+              }
+              style={styles.picker}
+            >
+              <Picker.Item label="Chưa bắt đầu" value="Chưa Bắt Đầu" />
+              <Picker.Item label="Đang thực hiện" value="Đang Thực Hiện" />
+              <Picker.Item label="Hoàn thành" value="Hoàn Thành" />
+            </Picker>
+          </View>
+
+          <Text style={styles.label}>Ưu tiên</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={priority}
+              onValueChange={(itemValue) =>
+                setPriority(itemValue as "Cao" | "Trung Bình" | "Thấp")
+              }
+              style={styles.picker}
+            >
+              <Picker.Item label="Cao" value="Cao" />
+              <Picker.Item label="Trung bình" value="Trung Bình" />
+              <Picker.Item label="Thấp" value="Thấp" />
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.mainButton, { backgroundColor: "#c8e6c9" }]}
+            onPress={handleAddTask}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="add" size={20} color="#66bb6a" />
+            <Text style={styles.mainButtonText}>Thêm công việc</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mainButton, { backgroundColor: "#eceff1" }]}
+            onPress={() => navigation.navigate("TaskList")}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="arrow-back" size={20} color="#90a4ae" />
+            <Text style={styles.mainButtonText}>Quay về</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <Text style={styles.label}>Ưu tiên</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={priority}
-          onValueChange={(itemValue) =>
-            setPriority(itemValue as "Cao" | "Trung Bình" | "Thấp")
-          }
-          style={styles.picker}
-        >
-          <Picker.Item label="Cao" value="Cao" />
-          <Picker.Item label="Trung bình" value="Trung Bình" />
-          <Picker.Item label="Thấp" value="Thấp" />
-        </Picker>
-      </View>
-
-      <Button title="Thêm công việc" onPress={handleAddTask} />
-      <Button
-        title="Quay về Trang chủ"
-        onPress={() => navigation.navigate("TaskList")}
-        color="gray"
-      />
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#f0f0f0",
-    marginTop: 100,
+    paddingTop: 60,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  buttonContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: "#f0f0f0",
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 26,
+    fontWeight: "600",
     textAlign: "center",
+    color: "#333",
     marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    backgroundColor: "white",
-  },
-  inputError: {
-    borderColor: "red",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginBottom: 10,
-  },
-  helperText: {
-    fontSize: 12,
-    color: "#555",
-    marginBottom: 10,
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#b0bec5",
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    fontSize: 16,
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  inputFilled: {
+    borderColor: "#78909c",
+  },
+  inputMultiline: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  inputError: {
+    borderColor: "#ef5350",
+  },
+  errorText: {
+    color: "#ef5350",
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  helperText: {
+    fontSize: 13,
+    color: "#78909c",
+    marginBottom: 12,
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 10,
-    backgroundColor: "white",
+    borderColor: "#b0bec5",
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   picker: {
     height: 50,
     width: "100%",
+  },
+  mainButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginVertical: 8,
+  },
+  mainButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginLeft: 8,
   },
 });

@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Alert,
   Image,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -37,57 +39,59 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome back</Text>
-      <Image
-        source={require("../images/login.jpg")}
-        style={{
-          width: 200,
-          height: 180,
-          marginBottom: 40,
-        }}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        multiline={false}
-        textBreakStrategy="simple"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        multiline={false}
-        textBreakStrategy="simple"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          marginTop: 20,
-        }}
-      >
-        <Text style={{ color: "#A5F3FC", fontWeight: 500 }}>
-          Don't have an account?
-        </Text>
-        <View style={{ width: 15 }} />
-        <Text
-          style={{ color: "#A5F3FC", fontWeight: "bold" }}
-          onPress={() => navigation.navigate("Register")}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome back</Text>
+        <Image
+          source={require("../images/login.jpg")}
+          style={{
+            width: 200,
+            height: 180,
+            marginBottom: 40,
+          }}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          multiline={false}
+          textBreakStrategy="simple"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          multiline={false}
+          textBreakStrategy="simple"
+        />
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 20,
+          }}
         >
-          Sign Up
-        </Text>
+          <Text style={{ color: "#A5F3FC", fontWeight: 500 }}>
+            Don't have an account?
+          </Text>
+          <View style={{ width: 15 }} />
+          <Text
+            style={{ color: "#A5F3FC", fontWeight: "bold" }}
+            onPress={() => navigation.navigate("Register")}
+          >
+            Sign Up
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

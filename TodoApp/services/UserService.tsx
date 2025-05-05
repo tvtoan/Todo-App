@@ -69,3 +69,29 @@ export const logout = async () => {
     console.error("Lỗi đăng xuất:", error);
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const token = await getToken();
+    if (!token) {
+      throw new Error("Không có token, vui lòng đăng nhập lại");
+    }
+    const response = await axios.get(`${API_URL}/current`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Lấy thông tin người dùng thành công:", response.data);
+    return response.data; // { id, email, username }
+  } catch (error: any) {
+    console.error(
+      "Lấy thông tin người dùng thất bại:",
+      error.response?.data,
+      error.message,
+      error.response?.status
+    );
+    throw new Error(
+      error.response?.data?.message || "Không thể lấy thông tin người dùng"
+    );
+  }
+};

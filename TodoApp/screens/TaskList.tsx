@@ -1,26 +1,34 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, Button, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList, Task } from "../types/navigation";
 import { getTasks, deleteTask } from "../services/TaskService";
-import { logout } from "../services/UserService";
+import { logout, getCurrentUser } from "../services/UserService";
+import { MaterialIcons } from "@expo/vector-icons";
 
 type TaskListNavigationProp = NavigationProp<RootStackParamList, "TaskList">;
 
 export default function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [username, setUsername] = useState<string>("");
   const navigation = useNavigation<TaskListNavigationProp>();
 
   const fetchTasks = async () => {
     try {
       const data = await getTasks();
-      // Sắp xếp theo dueDate (sớm nhất trước), sau đó theo priority (Cao > Trung Bình > Thấp)
       const sortedTasks = data.sort((a: Task, b: Task) => {
         const dateA = new Date(a.dueDate).getTime();
         const dateB = new Date(b.dueDate).getTime();
         if (dateA !== dateB) {
-          return dateA - dateB; // Sắp xếp theo ngày tăng dần
+          return dateA - dateB;
         }
         const priorityOrder: {
           [key in "Cao" | "Trung Bình" | "Thấp"]: number;
@@ -37,9 +45,19 @@ export default function TaskList() {
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      const user = await getCurrentUser();
+      setUsername(user.username);
+    } catch (error: any) {
+      Alert.alert("Lỗi", error.message || "Không thể lấy thông tin người dùng");
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchTasks();
+      fetchUser();
     }, [])
   );
 
@@ -60,40 +78,78 @@ export default function TaskList() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.welcomeText}>Xin Chào {username}</Text>
       <Text style={styles.title}>Danh sách công việc</Text>
-      <Button
-        title="Thêm công việc mới"
+      {tasks.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Hiện tại chưa có công việc nào</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={tasks}
+          renderItem={({ item }) => (
+            <View style={styles.taskItem}>
+              <View style={styles.taskContent}>
+                <Text style={styles.taskName}>{item.name}</Text>
+                <Text style={styles.taskDueDate}>
+                  Hạn: {new Date(item.dueDate).toLocaleDateString("vi-VN")}
+                </Text>
+                <Text style={styles.taskStatus}>Trạng thái: {item.status}</Text>
+                <Text
+                  style={[
+                    styles.taskPriority,
+                    {
+                      color:
+                        item.priority === "Cao"
+                          ? "#f06292"
+                          : item.priority === "Trung Bình"
+                          ? "#FF8F00"
+                          : "#81c784",
+                    },
+                  ]}
+                >
+                  Ưu tiên: {item.priority}
+                </Text>
+              </View>
+              <View style={styles.taskActions}>
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: "#bbdefb" }]}
+                  onPress={() =>
+                    navigation.navigate("EditTask", { task: item })
+                  }
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="edit" size={20} color="#42a5f5" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: "#ffcccb" }]}
+                  onPress={() => handleDeleteTask(item._id)}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="delete" size={20} color="#ef5350" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          keyExtractor={(item) => item._id}
+        />
+      )}
+      <TouchableOpacity
+        style={[styles.mainButton, { backgroundColor: "#c8e6c9" }]}
         onPress={() => navigation.navigate("AddTask")}
-      />
-      <Button title="Đăng xuất" onPress={handleLogout} color="red" />
-      <FlatList
-        data={tasks}
-        renderItem={({ item }) => (
-          <View style={styles.taskItem}>
-            <View style={styles.taskContent}>
-              <Text style={styles.taskName}>{item.name}</Text>
-              <Text style={styles.taskDueDate}>
-                Hạn: {new Date(item.dueDate).toLocaleDateString("vi-VN")}
-              </Text>
-              <Text style={styles.taskStatus}>Trạng thái: {item.status}</Text>
-              <Text style={styles.taskPriority}>Ưu tiên: {item.priority}</Text>
-            </View>
-            <View style={styles.taskActions}>
-              <Button
-                title="Sửa"
-                onPress={() => navigation.navigate("EditTask", { task: item })}
-                color="blue"
-              />
-              <Button
-                title="Xóa"
-                onPress={() => handleDeleteTask(item._id)}
-                color="red"
-              />
-            </View>
-          </View>
-        )}
-        keyExtractor={(item) => item._id}
-      />
+        activeOpacity={0.7}
+      >
+        <MaterialIcons name="add" size={20} color="#66bb6a" />
+        <Text style={styles.mainButtonText}>Thêm công việc</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.mainButton, { backgroundColor: "#ffe0b2" }]}
+        onPress={handleLogout}
+        activeOpacity={0.7}
+      >
+        <MaterialIcons name="logout" size={20} color="#ffa726" />
+        <Text style={styles.mainButtonText}>Đăng xuất</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -101,45 +157,97 @@ export default function TaskList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f0f0f0",
-    marginTop: 100,
+    padding: 16,
+    backgroundColor: "#636bfb",
+    paddingTop: 70,
+  },
+  welcomeText: {
+    fontSize: 20,
+    fontWeight: "500",
+    textAlign: "center",
+    color: "#fff",
+    marginBottom: 10,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 26,
+    fontWeight: "600",
     textAlign: "center",
+    color: "#fff",
     marginBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  emptyText: {
+    fontSize: 20,
+    color: "#fff",
+    textAlign: "center",
   },
   taskItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
-    backgroundColor: "white",
-    borderRadius: 5,
-    marginVertical: 5,
+    padding: 14,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    marginVertical: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   taskContent: {
     flex: 1,
+    paddingRight: 12,
   },
   taskName: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "500",
+    color: "black",
+    marginBottom: 4,
   },
   taskDueDate: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 13,
+    color: "black",
+    marginBottom: 4,
   },
   taskStatus: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 13,
+    color: "#333",
+    marginBottom: 4,
   },
   taskPriority: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 13,
+    fontWeight: "500",
   },
   taskActions: {
     flexDirection: "row",
-    gap: 10,
+    alignItems: "center",
+    gap: 12,
+  },
+  actionButton: {
+    padding: 10,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  mainButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  mainButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginLeft: 8,
   },
 });
