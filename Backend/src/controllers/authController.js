@@ -71,9 +71,59 @@ export const getCurrentUser = async (req, res) => {
       return res.status(404).json({ message: "Người dùng không tồn tại" });
     }
 
-    res.json({ id: user._id, email: user.email, username: user.username });
+    res.json({
+      id: user._id,
+      email: user.email,
+      username: user.username,
+      address: user.address,
+      phoneNumber: user.phoneNumber,
+    });
   } catch (error) {
     console.error(error);
     res.status(401).json({ message: "Token không hợp lệ" });
   }
 };
+
+export const updateUser = [
+  body("username").optional().notEmpty(),
+  body("address").optional().isString(),
+  body("phoneNumber").optional().isString(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const token = req.headers.authorization?.split(" ")[1];
+      if (!token) {
+        return res
+          .status(401)
+          .json({ message: "Không có token, truy cập bị từ chối" });
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(404).json({ message: "Người dùng không tồn tại" });
+      }
+
+      const { username, address, phoneNumber } = req.body;
+      if (username) user.username = username;
+      if (address !== undefined) user.address = address;
+      if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+
+      await user.save();
+      res.json({
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        address: user.address,
+        phoneNumber: user.phoneNumber,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+];
