@@ -181,6 +181,7 @@ export default function EditTask() {
           <TextInput
             style={[styles.input, name ? styles.inputFilled : null]}
             placeholder="Tên công việc"
+            placeholderTextColor="#b0bec5"
             value={name}
             onChangeText={setName}
           />
@@ -193,6 +194,7 @@ export default function EditTask() {
               styles.inputMultiline,
             ]}
             placeholder="Mô tả"
+            placeholderTextColor="#b0bec5"
             value={description}
             onChangeText={setDescription}
             multiline
@@ -209,6 +211,7 @@ export default function EditTask() {
                 : null,
             ]}
             placeholder="YYYY-MM-DD (ví dụ: 2025-07-22)"
+            placeholderTextColor="#b0bec5"
             value={dueDate}
             onChangeText={handleDueDateChange}
           />
@@ -257,14 +260,14 @@ export default function EditTask() {
             activeOpacity={0.7}
           >
             <MaterialIcons name="save" size={20} color="#66bb6a" />
-            <Text style={styles.mainButtonText}>Cập nhật công việc</Text>
+            <Text style={styles.mainButtonText}>Cập nhật</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.mainButton, { backgroundColor: "#eceff1" }]}
+            style={[styles.mainButton, { backgroundColor: "#ffcccb" }]}
             onPress={() => navigation.navigate("TaskList")}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="arrow-back" size={20} color="#90a4ae" />
+            <MaterialIcons name="arrow-back" size={20} color="#ef5350" />
             <Text style={styles.mainButtonText}>Quay về</Text>
           </TouchableOpacity>
         </View>
@@ -276,7 +279,7 @@ export default function EditTask() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#636bfb",
     paddingTop: 60,
   },
   content: {
@@ -284,23 +287,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingBottom: 16,
-    backgroundColor: "#f0f0f0",
+    paddingVertical: 16,
+    backgroundColor: "#636bfb",
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+    borderTopColor: "#ffffff33",
   },
   title: {
     fontSize: 26,
     fontWeight: "600",
     textAlign: "center",
-    color: "#333",
+    color: "#fff",
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: "#fff",
     marginBottom: 8,
     marginTop: 8,
   },
@@ -309,7 +314,7 @@ const styles = StyleSheet.create({
     borderColor: "#b0bec5",
     padding: 12,
     borderRadius: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f5f5",
     fontSize: 16,
     marginBottom: 8,
     shadowColor: "#000",
@@ -329,20 +334,20 @@ const styles = StyleSheet.create({
     borderColor: "#ef5350",
   },
   errorText: {
-    color: "#ef5350",
+    color: "#ffcccb",
     fontSize: 13,
     marginBottom: 8,
   },
   helperText: {
     fontSize: 13,
-    color: "#78909c",
+    color: "#b0bec5",
     marginBottom: 12,
   },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#b0bec5",
     borderRadius: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f5f5",
     marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -353,15 +358,17 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: "100%",
+    color: "#333",
   },
   mainButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
-    marginVertical: 8,
+    marginHorizontal: 4,
   },
   mainButtonText: {
     fontSize: 16,

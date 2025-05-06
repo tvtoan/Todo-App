@@ -5,14 +5,12 @@ const API_URL = "http://10.0.2.2:3002/api/auth";
 
 export const login = async (email: string, password: string) => {
   try {
-    console.log("Gửi yêu cầu đăng nhập:", { email, password });
     const response = await axios.post(`${API_URL}/login`, {
       email: email.trim(),
       password: password.trim(),
     });
     const { token } = response.data;
     await AsyncStorage.setItem("token", token);
-    console.log("Đăng nhập thành công, token:", token);
     return response.data; // { token, user: { id, email, username } }
   } catch (error: any) {
     console.error(
@@ -31,14 +29,12 @@ export const register = async (
   password: string
 ) => {
   try {
-    console.log("Gửi yêu cầu đăng ký:", { username, email, password });
     const response = await axios.post(`${API_URL}/register`, {
       username: username.trim(),
       email: email.trim(),
       password: password.trim(),
     });
-    console.log("Đăng ký thành công:", response.data);
-    return response.data; // { message: "Đăng ký thành công" }
+    return response.data;
   } catch (error: any) {
     console.error(
       "Đăng ký thất bại:",
@@ -53,7 +49,6 @@ export const register = async (
 export const getToken = async (): Promise<string | null> => {
   try {
     const token = await AsyncStorage.getItem("token");
-    console.log("Lấy token:", token ? "Thành công" : "Không có token");
     return token;
   } catch (error) {
     console.error("Lỗi lấy token:", error);
@@ -64,7 +59,6 @@ export const getToken = async (): Promise<string | null> => {
 export const logout = async () => {
   try {
     await AsyncStorage.removeItem("token");
-    console.log("Đăng xuất thành công");
   } catch (error) {
     console.error("Lỗi đăng xuất:", error);
   }
@@ -81,7 +75,6 @@ export const getCurrentUser = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log("Lấy thông tin người dùng thành công:", response.data);
     return response.data; // { id, email, username }
   } catch (error: any) {
     console.error(
@@ -92,6 +85,39 @@ export const getCurrentUser = async () => {
     );
     throw new Error(
       error.response?.data?.message || "Không thể lấy thông tin người dùng"
+    );
+  }
+};
+
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  address?: string;
+  phoneNumber?: string;
+}
+
+export const updateUser = async (data: Partial<User>) => {
+  try {
+    const token = await getToken();
+    if (!token) {
+      throw new Error("Không có token, vui lòng đăng nhập lại");
+    }
+    const response = await axios.put(`${API_URL}/update`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // { id, email, username, address, phoneNumber }
+  } catch (error: any) {
+    console.error(
+      "Cập nhật thông tin người dùng thất bại:",
+      error.response?.data,
+      error.message,
+      error.response?.status
+    );
+    throw new Error(
+      error.response?.data?.message || "Không thể cập nhật thông tin"
     );
   }
 };

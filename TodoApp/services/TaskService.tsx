@@ -23,11 +23,9 @@ export const getTasks = async (): Promise<Task[]> => {
     const token = await getToken();
     if (!token) throw new Error("Không tìm thấy token");
 
-    console.log("Gửi yêu cầu lấy danh sách công việc");
     const response = await axios.get(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log("Lấy danh sách công việc thành công:", response.data);
 
     // Ánh xạ status và priority sang tiếng Việt
     const tasks = response.data.map((task: any) => ({
@@ -62,19 +60,11 @@ export const createTask = async (
     const token = await getToken();
     if (!token) throw new Error("Không tìm thấy token");
 
-    console.log("Gửi yêu cầu tạo công việc:", {
-      name,
-      dueDate,
-      description,
-      status,
-      priority,
-    });
     const response = await axios.post(
       API_URL,
       { name, description, dueDate, status, priority },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log("Tạo công việc thành công:", response.data);
 
     // Ánh xạ lại sang tiếng Việt (nếu backend trả về tiếng Anh)
     return {
@@ -103,11 +93,9 @@ export const updateTask = async (taskId: string, updates: Partial<Task>) => {
     const token = await getToken();
     if (!token) throw new Error("Không tìm thấy token");
 
-    console.log("Gửi yêu cầu cập nhật công việc:", { taskId, updates });
     const response = await axios.put(`${API_URL}/${taskId}`, updates, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log("Cập nhật công việc thành công:", response.data);
 
     // Ánh xạ lại sang tiếng Việt
     return {
@@ -136,11 +124,9 @@ export const deleteTask = async (taskId: string) => {
     const token = await getToken();
     if (!token) throw new Error("Không tìm thấy token");
 
-    console.log("Gửi yêu cầu xóa công việc:", { taskId });
     const response = await axios.delete(`${API_URL}/${taskId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log("Xóa công việc thành công:", response.data);
     return response.data; // { message: "Task deleted" }
   } catch (error: any) {
     console.error(

@@ -5,6 +5,7 @@ import Login from "./screens/Login";
 import TaskList from "./screens/TaskList";
 import AddTask from "./screens/AddTask";
 import EditTask from "./screens/EditTask";
+import UserInfo from "./screens/UserInfo";
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,11 @@ export default function App() {
         <Stack.Screen
           name="EditTask"
           component={EditTask}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UserInfo"
+          component={UserInfo}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

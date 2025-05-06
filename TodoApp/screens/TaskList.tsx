@@ -78,7 +78,16 @@ export default function TaskList() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Xin Chào {username}</Text>
+      <View style={styles.header}>
+        <Text style={styles.welcomeText}>Xin chào {username}</Text>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => navigation.navigate("UserInfo")}
+          activeOpacity={0.7}
+        >
+          <MaterialIcons name="person" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.title}>Danh sách công việc</Text>
       {tasks.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -134,22 +143,24 @@ export default function TaskList() {
           keyExtractor={(item) => item._id}
         />
       )}
-      <TouchableOpacity
-        style={[styles.mainButton, { backgroundColor: "#c8e6c9" }]}
-        onPress={() => navigation.navigate("AddTask")}
-        activeOpacity={0.7}
-      >
-        <MaterialIcons name="add" size={20} color="#66bb6a" />
-        <Text style={styles.mainButtonText}>Thêm công việc</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.mainButton, { backgroundColor: "#ffe0b2" }]}
-        onPress={handleLogout}
-        activeOpacity={0.7}
-      >
-        <MaterialIcons name="logout" size={20} color="#ffa726" />
-        <Text style={styles.mainButtonText}>Đăng xuất</Text>
-      </TouchableOpacity>
+      <View style={styles.optionsBar}>
+        <TouchableOpacity
+          style={[styles.optionButton, { backgroundColor: "#c8e6c9" }]}
+          onPress={() => navigation.navigate("AddTask")}
+          activeOpacity={0.7}
+        >
+          <MaterialIcons name="add" size={20} color="#66bb6a" />
+          <Text style={styles.optionText}>Thêm công việc</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionButton, { backgroundColor: "#ffcccb" }]}
+          onPress={handleLogout}
+          activeOpacity={0.7}
+        >
+          <MaterialIcons name="logout" size={20} color="#ef5350" />
+          <Text style={styles.optionText}>Đăng xuất</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -161,12 +172,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#636bfb",
     paddingTop: 70,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
   welcomeText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "500",
-    textAlign: "center",
     color: "#fff",
-    marginBottom: 10,
+  },
+  headerButton: {
+    padding: 10,
+    marginBottom: 4,
   },
   title: {
     fontSize: 26,
@@ -234,18 +253,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  mainButton: {
+  optionsBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: "auto",
+    marginBottom: 16,
+  },
+  optionButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
-    paddingHorizontal: 16,
     borderRadius: 10,
-    marginTop: 12,
-    marginBottom: 8,
+    marginHorizontal: 4,
   },
-  mainButtonText: {
-    fontSize: 16,
+  optionText: {
+    fontSize: 14,
     fontWeight: "500",
     color: "#333",
     marginLeft: 8,
